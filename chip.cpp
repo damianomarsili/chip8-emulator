@@ -2,6 +2,7 @@
 #include "chip.h"
 #include <iostream>
 #include <fstream>
+#include <stdlib.h>
 
 // --- Initialization functions ---
 
@@ -79,13 +80,13 @@ void Chip::op_2nnn() {
 }
 
 void Chip::op_3xkk() {
-	if (registers[opcode & 0x0F00] == opcode & 0x00FF) {
+	if (registers[opcode & 0x0F00] == (opcode & 0x00FF)) {
 		PC += 2;
 	}
 }
 
 void Chip::op_4xkk() {
-	if (registers[opcode & 0x0F00] != opcode & 0x00FF) {
+	if (registers[opcode & 0x0F00] != (opcode & 0x00FF)) {
 		PC += 2;
 	}
 }
@@ -97,11 +98,11 @@ void Chip::op_5xy0() {
 }
 
 void Chip::op_6xkk() {
-	registers[opcode & 0x0F00] = opcode & 0x00FF;
+	registers[opcode & 0x0F00] = (opcode & 0x00FF);
 }
 
 void Chip::op_7xkk() {
-	registers[opcode & 0x0F00] += opcode & 0x00FF;
+	registers[opcode & 0x0F00] += (opcode & 0x00FF);
 }
 
 void Chip::op_8xy0() {
@@ -172,23 +173,83 @@ void Chip::op_8xye() {
 	registers[opcode & 0x0F00] *= 2;
 }
 
+void Chip::op_9xy0() {
+	if (registers[opcode & 0x0F00] != registers[opcode & 0x00F0]) {
+		PC += 2;
+	}
+}
 
+void Chip::op_annn() {
+	i_register = (opcode & 0x0FFF);
+}
 
+void Chip::op_bnnn() {
+	PC = (opcode & 0x0FFF) + registers[0];
+}
 
+void Chip::op_cxkk() {
+	uint8_t random_byte = (uint8_t) (rand() % 255);
+	registers[opcode & 0x0F00] = random_byte & (opcode & 0x00FF);
+}
 
+void Chip::op_dxyn() {
+	// TODO: FIGURE OUT
+}
 
+void Chip::op_ex9e() {
+	// TODO: FIGURE OUT
+}
 
+void Chip::op_exa1() {
+	// TODO: FIGURE OUT
+}
 
+void Chip::op_fx07() {
+	registers[opcode & 0x0F00] = delay_register;
+}
 
+void Chip::op_fx0a() {
+	// TODO: FIGURE OUT
+}
 
+void Chip::op_fx15() {
+	delay_register = registers[opcode & 0x0F00];
+}
 
+void Chip::op_fx18() {
+	sound_register = registers[opcode & 0x0F00];
+}
 
+void Chip::op_fx1e() {
+	i_register += registers[opcode & 0x0F00]; 
+}
 
+void Chip::op_fx29() {
+	i_register = registers[opcode & 0x0F00] * 5;
+}
 
+void Chip::op_fx33() {
+	uint8_t vx = registers[opcode & 0x0F00];
+	memory[i_register] = vx / 100;
+	vx %= 100;
+	memory[i_register + 1] = vx / 10;
+	vx %= 10;
+	memory[i_register + 2] = vx;
+}
 
+void Chip::op_fx55() {
+	int x = opcode & 0x0F00;
+	for (int t = 0; t < x; t++) {
+		memory[i_register + t] = registers[t];
+	}	
+}
 
-
-
+void Chip::op_fx65() {
+	int x = opcode & 0x0F00;
+	for (int t = 0; t < x; t++) {
+		registers[t] = memory[i_register + t];
+	}
+}
 
 
 
